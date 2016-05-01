@@ -4,24 +4,27 @@
 use Core\Console;
 use Core\Model;
 use Core\TwitterApi;
+use Model\User;
 
 /** @var TwitterApi $api */
 $api = include __DIR__ . '/../bootstrap.php';
 
-$followers  = Model::getList('followers');
-$friends    = Model::getList('friends');
-$whitelist  = Model::getList('whitelist');
-$blocks     = Model::getList('blocks');
-$searches   = Model::getList('searches');
-$unfollowed = Model::getList('actions/unfollowed');
-$followed   = Model::getList('actions/followed');
+$followers       = Model::getList('followers');
+$friends         = Model::getList('friends');
+$whitelist       = Model::getList('whitelist');
+$blocks          = Model::getList('blocks');
+$unfollowed      = Model::getList('actions/unfollowed');
+$followed        = Model::getList('actions/followed');
+$usersToFollow   = User::getUserToFollow();
+$usersToUnfollow = User::getUserToUnfollow();
 
 Console::title('Statistiques');
 
-echo "Followers  : " . number_format(count($followers), 0, '.', ' ') . "\n";
-echo "Fiends     : " . number_format(count($friends), 0, '.', ' ') . "\n";
-echo "Whitelist  : " . number_format(count($whitelist), 0, '.', ' ') . "\n";
-echo "Blocked    : " . number_format(count($blocks), 0, '.', ' ') . "\n";
-echo "Searches   : " . number_format(count($searches), 0, '.', ' ') . "\n";
-echo "Unfollowed : " . number_format(count($unfollowed), 0, '.', ' ') . "\n";
-echo "Followed   : " . number_format(count($followed), 0, '.', ' ') . "\n";
+echo "Followers         : " . number_format(count($followers), 0, '.', ' ') . "\n";
+echo "Fiends            : " . number_format(count($friends), 0, '.', ' ') . "\n";
+echo "Whitelist         : " . number_format(count($whitelist), 0, '.', ' ') . "\n";
+echo "Blocked           : " . number_format(count($blocks), 0, '.', ' ') . "\n";
+echo "Unfollowed        : " . number_format(count($unfollowed), 0, '.', ' ') . "\n";
+echo "Followed          : " . number_format(count($followed), 0, '.', ' ') . "\n";
+echo "Users to follow   : " . number_format($usersToFollow['count'], 0, '.', ' ') . " / " . number_format($usersToFollow['total'], 0, '.', ' ') . "\n";
+echo "Users to unfollow : " . number_format($usersToUnfollow['count'], 0, '.', ' ') . " / " . number_format($usersToUnfollow['total'], 0, '.', ' ') . "\n";

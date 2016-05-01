@@ -2,99 +2,44 @@
 <?php
 
 use Core\Console;
-use Core\Model;
 use Core\TwitterApi;
 use Model\Actions\Followed;
+use Model\User;
 
 /** @var TwitterApi $api */
 $api = include __DIR__ . '/../bootstrap.php';
 
-$followers      = Model::getList('followers');
-$friends        = Model::getList('friends');
-$whitelist      = Model::getList('whitelist');
-$unfollowed     = Model::getList('actions/unfollowed');
-$followed       = Model::getList('actions/followed');
-$blocks         = Model::getList('blocks');
-$searches       = Model::getList('searches');
-$usersList      = array_merge($followers, $friends, $whitelist, $blocks, $followed);
+Console::header('Follow users');
 
-if (!count($followers)
-    || !count($friends)) {
+$users = User::getUserToFollow();
 
-    exit;
+if (null === $users
+    || 0 === $users['count']) {
+
+    return;
 }
 
-$nowDate        = (new \DateTime())->format('Y-m-d');
-$unfollowedDate = (new \DateTime())->modify('-' . DEFAULT_REFOLLOW_DAYS . ' days')->format('Y-m-d');
-$activityDate   = (new \DateTime())->modify('-' . DEFAULT_MIN_ACTIVITY_DAYS . ' days')->format('Y-m-d');
+$nowDate = (new \DateTime())->format('Y-m-d');
 
-$userTotal      = count($searches);
-$userCount      = 0;
-$users          = [];
+Followed::load();
 
-if ($userTotal) {
+foreach ($users['items'] as $userId => $user) {
 
-    foreach ($searches as $userId => $user) {
+    Console::log($user);
 
-        $user['ratio'] = 0 !== (int) $user['followers_count'] ? (int) $user['friends_count'] / (int) $user['followers_count'] : 0;
+    Followed::sync([
+        'id'   => $user['id'],
+        'date' => $nowDate
+    ]);
 
-        if (array_key_exists($userId, $usersList)
-            || (array_key_exists($userId, $unfollowed)
-                && (new \DateTime($unfollowed[$userId]['date']))->format('Y-m-d') > $unfollowedDate)
-            || 0 !== (int) $user['protected']
-            || '' === (string) $user['profile_image_url_https']
-            || DEFAULT_MIN_TWEETS > (int) $user['statuses_count']
-            || DEFAULT_MIN_FRIENDS > (int) $user['friends_count']
-            || DEFAULT_MIN_FOLLOWERS > (int) $user['followers_count']
-            || DEFAULT_MIN_FRIENDS_RATIO > $user['ratio']
-            || DEFAULT_MAX_FRIENDS_RATIO < $user['ratio']
-            || DEFAULT_LANGUAGE !== (string) $user['lang']
-            || (new \DateTime($user['last_status']))->format('Y-m-d') < $activityDate
-            || (string) $user['screen_name'] === (string) TWITTER_SCREEN_NAME
-            ) {
-
-            continue;
-        }
-
-        $users[$userId] = $user;
-        $userCount++;
-    }
-
-    if ($users) {
-
-        Followed::load();
-
-        $usersByFolowers = [];
-
-        foreach ($users as $id => $user) {
-
-            $usersByFolowers[$id] = $user['followers_count'];
-        }
-
-        array_multisort($usersByFolowers, SORT_NUMERIC, SORT_DESC, $users);
-        $users = array_slice($users, 0, DEFAULT_MAX_FOLLOW_PER_DAY);
-
-        Console::header('Follow users');
-
-        foreach ($users as $user) {
-
-            Console::log($user);
-
-            Followed::sync([
-                'id'   => $user['id'],
-                'date' => $nowDate
-            ]);
-
-            //Follow
-            $api->post('friendships/create', [
-                'user_id' => $user['id'],
-                'follow' => true
-            ]);
-            sleep(1);
-        }
-
-        Followed::save();
-    }
+    //Follow
+    $api->post('friendships/create', [
+        'user_id' => $user['id'],
+        'follow' => true
+    ]);
+    sleep(1);
 }
 
-Console::total($userCount, $userTotal);
+Followed::save();
+
+Console::total($users['count'], $users['total']);

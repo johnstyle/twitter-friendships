@@ -2,63 +2,43 @@
 <?php
 
 use Core\Console;
-use Core\Model;
 use Core\TwitterApi;
 use Model\Actions\Unfollowed;
+use Model\User;
 
 /** @var TwitterApi $api */
 $api = include __DIR__ . '/../bootstrap.php';
 
-$followers    = Model::getList('followers');
-$friends      = Model::getList('friends');
-$whitelist    = Model::getList('whitelist');
-$followed     = Model::getList('actions/followed');
+Console::header('Unfollow users');
 
-if (!count($followers)
-    || !count($friends)) {
+$users = User::getUserToUnfollow();
 
-    exit;
+if (null === $users
+    || 0 === $users['count']) {
+
+    return;
 }
 
-$nowDate      = (new \DateTime())->format('Y-m-d');
-$followedDate = (new \DateTime())->modify('-' . DEFAULT_UNFOLLOW_DAYS . ' days')->format('Y-m-d');
+$nowDate = (new \DateTime())->format('Y-m-d');
 
-$destroyUsers = array_diff_key($friends, $followers, $whitelist);
-$destroyTotal = count($destroyUsers);
-$destroyCount = 0;
+Unfollowed::load();
 
-if ($destroyUsers) {
+foreach ($users['items'] as $userId => $user) {
 
-    Unfollowed::load();
+    Console::log($user);
 
-    Console::header('Unfollow users');
+    Unfollowed::sync([
+        'id'   => $user['id'],
+        'date' => $nowDate
+    ]);
 
-    foreach ($destroyUsers as $userId => $user) {
-
-        if (!array_key_exists($userId, $friends)
-            || !array_key_exists($userId, $followed)
-            || (new \DateTime($followed[$userId]['date']))->format('Y-m-d') > $followedDate) {
-
-            continue;
-        }
-
-        Console::log($user);
-
-        Unfollowed::sync([
-            'id'   => $user['id'],
-            'date' => $nowDate
-        ]);
-
-        // Unfollow
-        $api->post('friendships/destroy', [
-            'user_id' => $user['id'],
-        ]);
-        sleep(1);
-
-        $destroyCount++;
-    }
-
-    Unfollowed::save();
+    // Unfollow
+    $api->post('friendships/destroy', [
+        'user_id' => $user['id'],
+    ]);
+    sleep(1);
 }
 
-Console::total($destroyCount, $destroyTotal);
+Unfollowed::save();
+
+Console::total($users['count'], $users['total']);

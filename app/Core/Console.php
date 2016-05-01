@@ -61,10 +61,10 @@ class Console
      * @param $count
      * @param $total
      */
-    public static function total($count, $total)
+    public static function total($count, $total = null)
     {
         echo str_repeat('-', 110) . "\n";
-        echo 'Total: ' . $count . " / " . $total . " users\n";
+        echo 'Total: ' . $count . (null !== $total ? " / " . $total : '') . " users\n";
         echo str_repeat('-', 110) . "\n";
     }
 }
