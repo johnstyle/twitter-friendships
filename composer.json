@@ -1,0 +1,21 @@
+{
+  "name": "johnstyle/twitter",
+  "description": "twitter",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Jonathan Sahm",
+      "email": "contact@johnstyle.fr"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "kertz/twitteroauth": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "": "app/"
+    }
+  }
+}

@@ -1,0 +1,111 @@
+#!/usr/bin/env php
+<?php
+
+use Core\Model;
+use Core\TwitterApi;
+
+/** @var TwitterApi $api */
+$api = include __DIR__ . '/../bootstrap.php';
+
+$followers    = Model::getList('followers');
+$friends      = Model::getList('friends');
+$whitelist    = Model::getList('whitelist');
+$unfollowers  = Model::getList('unfollowers');
+$blocks       = Model::getList('blocks');
+$searches     = Model::getList('searches');
+$usersList    = array_merge($followers, $friends, $whitelist, $blocks);
+
+$expiredDate  = (new \DateTime())->modify('-' . DEFAULT_REFOLLOW_DAYS . ' days')->format('Y-m-d');
+$activityDate = (new \DateTime())->modify('-' . DEFAULT_MIN_ACTIVITY_DAYS . ' days')->format('Y-m-d');
+$userTotal    = count($searches);
+$userCount    = 0;
+$users        = [];
+
+if ($userTotal) {
+
+    foreach ($searches as $userId => $user) {
+
+//        echo $user['screen_name'] . ' | ' .
+//             $user['statuses_count'] . ' | ' .
+//             $user['friends_count'] . ' | ' .
+//             $user['followers_count'] . ' | ' .
+//             round((int) $user['friends_count'] / (int) $user['followers_count'], 2) . ' | ' .
+//             $user['lang'] . ' | ' .
+//             "\n";
+
+        $user['ratio'] = 0 !== (int) $user['followers_count'] ? (int) $user['friends_count'] / (int) $user['followers_count'] : 0;
+
+        if (array_key_exists($userId, $usersList)
+            || (array_key_exists($userId, $unfollowers)
+                && (new \DateTime($unfollowers[$userId]['date']))->format('Y-m-d') > $expiredDate)
+            || 0 !== (int) $user['protected']
+            || '' === (string) $user['profile_image_url_https']
+            || DEFAULT_MIN_TWEETS > (int) $user['statuses_count']
+            || DEFAULT_MIN_FRIENDS > (int) $user['friends_count']
+            || DEFAULT_MIN_FOLLOWERS > (int) $user['followers_count']
+            || DEFAULT_MIN_FRIENDS_RATIO > $user['ratio']
+            || DEFAULT_MAX_FRIENDS_RATIO < $user['ratio']
+            || DEFAULT_LANGUAGE !== (string) $user['lang']
+            || (new \DateTime($user['last_status']))->format('Y-m-d') < $activityDate
+            || (string) $user['screen_name'] === (string) TWITTER_SCREEN_NAME
+            ) {
+
+            continue;
+        }
+
+        $users[$userId] = $user;
+        $userCount++;
+    }
+
+    if ($users) {
+
+        $usersByFolowers = [];
+
+        foreach ($users as $id => $user) {
+
+            $usersByFolowers[$id] = $user['followers_count'];
+        }
+
+        array_multisort($usersByFolowers, SORT_NUMERIC, SORT_DESC, $users);
+        $users = array_slice($users, 0, 30);
+
+        echo str_repeat('-', 110) . "\n";
+        echo str_pad('Profil', 50, ' ', STR_PAD_RIGHT) . ' | ' .
+            str_pad('Tweets', 9, ' ', STR_PAD_LEFT) . ' | ' .
+            str_pad('Fiends', 9, ' ', STR_PAD_LEFT) . ' | ' .
+            str_pad('Followers', 9, ' ', STR_PAD_LEFT) . ' | ' .
+            str_pad('Ratio', 5, ' ', STR_PAD_LEFT) . ' | ' .
+            str_pad('Lang', 4, ' ', STR_PAD_LEFT) . ' | ' .
+            str_pad('Last tweet', 19, ' ', STR_PAD_RIGHT) . ' | ' .
+            str_pad('Date add', 19, ' ', STR_PAD_RIGHT) . ' | ' .
+            str_pad('Search term', 20, ' ', STR_PAD_RIGHT) .
+            "\n";
+        echo str_repeat('-', 110) . "\n";
+
+        foreach ($users as $user) {
+
+            echo str_pad('https://twitter.com/' . $user['screen_name'], 50, ' ', STR_PAD_RIGHT) . ' | ' .
+             str_pad(number_format($user['statuses_count'], 0, '.', ' '), 9, ' ', STR_PAD_LEFT) . ' | ' .
+             str_pad(number_format($user['friends_count'], 0, '.', ' '), 9, ' ', STR_PAD_LEFT) . ' | ' .
+             str_pad(number_format($user['followers_count'], 0, '.', ' '), 9, ' ', STR_PAD_LEFT) . ' | ' .
+             str_pad(number_format($user['ratio'], 2, '.', ' '), 5, ' ', STR_PAD_LEFT) . ' | ' .
+             str_pad($user['lang'], 4, ' ', STR_PAD_LEFT) . ' | ' .
+             str_pad($user['last_status'], 19, ' ', STR_PAD_RIGHT) . ' | ' .
+             str_pad($user['date'], 19, ' ', STR_PAD_RIGHT) . ' | ' .
+             str_pad($user['search_term'], 20, ' ', STR_PAD_RIGHT) .
+             "\n";
+
+
+            // Follow
+//        $api->post('friendships/create', [
+//            'user_id' => $user['id'],
+//            'follow' => true
+//        ]);
+//        sleep(1);
+        }
+    }
+}
+
+echo str_repeat('-', 110) . "\n";
+echo 'Total: ' . $userCount . " / " . $userTotal . " users\n";
+echo str_repeat('-', 110) . "\n";

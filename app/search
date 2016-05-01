@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+
+use Core\TwitterApi;
+
+/** @var TwitterApi $api */
+$api = include __DIR__ . '/../bootstrap.php';
+
+foreach(TwitterApi::$searches as $search) {
+
+    $api->sync('users/search', array(
+        'q' => $search,
+        'count' => 20,
+    ), '\\Model\\Search', DEFAULT_CACHE_TIME);
+}

@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+
+use Core\TwitterApi;
+
+/** @var TwitterApi $api */
+$api = include __DIR__ . '/../bootstrap.php';
+
+$api->sync('followers/list', array(
+    'screen_name' => TWITTER_SCREEN_NAME,
+    'count' => 200,
+), '\\Model\\Follower');
+
+$api->sync('friends/list', array(
+    'screen_name' => TWITTER_SCREEN_NAME,
+    'count' => 200,
+), '\\Model\\Friend');
+
+$api->sync('blocks/list', array(
+    'screen_name' => TWITTER_SCREEN_NAME,
+    'count' => 200,
+), '\\Model\\Block');
+
+$api->sync('lists/members', array(
+    'slug' => 'whitelist',
+    'owner_screen_name' => TWITTER_SCREEN_NAME,
+    'count' => 200,
+), '\\Model\\Whitelist');
