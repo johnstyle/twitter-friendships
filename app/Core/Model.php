@@ -27,7 +27,7 @@ class Model
 
         if (null === $this->date) {
 
-            $this->date = date('Y-m-d H:i:s');
+            $this->date = (new \DateTime())->format('Y-m-d');
         }
     }
 
@@ -73,10 +73,9 @@ class Model
     }
 
     /**
-     * @param  array $filters
      * @return array
      */
-    public static function load(array $filters = null)
+    public static function load()
     {
         if (null === static::$data) {
 
@@ -87,7 +86,7 @@ class Model
     }
 
     /**
-     * @return array
+     * @param array $data
      */
     public static function sync(array $data)
     {
@@ -120,7 +119,7 @@ class Model
      */
     public static function getList($file)
     {
-        $file = DIR_DATA . '/' . basename(ltrim($file, '/'), '.json') . '.json';
+        $file = DIR_DATA . '/' . preg_replace('#\.json$#', '', ltrim($file, '/')) . '.json';
 
         return file_exists($file)
             ? json_decode(file_get_contents($file), true)
