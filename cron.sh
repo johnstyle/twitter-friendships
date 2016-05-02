@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-php bin/stat
 php bin/sync
-php bin/unfollow
+
+if [ "${1}" = '--unfollow' ]; then
+
+    php bin/unfollow
+fi
+
 php bin/follow
 php bin/search

@@ -34,7 +34,7 @@ class Console
             str_pad('Ratio', 5, ' ', STR_PAD_LEFT) . ' | ' .
             str_pad('Lang', 4, ' ', STR_PAD_LEFT) . ' | ' .
             str_pad('Last tweet', 19, ' ', STR_PAD_RIGHT) . ' | ' .
-            str_pad('Date add', 19, ' ', STR_PAD_RIGHT) . ' | ' .
+            str_pad('Date add', 10, ' ', STR_PAD_RIGHT) . ' | ' .
             str_pad('Search term', 20, ' ', STR_PAD_RIGHT) .
             "\n";
         echo str_repeat('-', 110) . "\n";
@@ -52,7 +52,7 @@ class Console
             str_pad(number_format($data['ratio'], 2, '.', ' '), 5, ' ', STR_PAD_LEFT) . ' | ' .
             str_pad($data['lang'], 4, ' ', STR_PAD_LEFT) . ' | ' .
             str_pad($data['last_status'], 19, ' ', STR_PAD_RIGHT) . ' | ' .
-            str_pad($data['date'], 19, ' ', STR_PAD_RIGHT) . ' | ' .
+            str_pad($data['date'], 10, ' ', STR_PAD_RIGHT) . ' | ' .
             str_pad($data['search_term'], 20, ' ', STR_PAD_RIGHT) .
             "\n";
     }

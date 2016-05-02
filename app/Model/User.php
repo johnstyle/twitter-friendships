@@ -95,22 +95,20 @@ class User extends Model
         }
 
         $usersTotal = count($users);
-
-        $usersByFolowers = [];
+        $usersSort  = [];
 
         foreach ($users as $id => $user) {
 
-            $usersByFolowers[$id] = $user['followers_count'];
+            $usersSort[$id] = $user['followers_count'];
         }
 
-        array_multisort($usersByFolowers, SORT_NUMERIC, SORT_DESC, $users);
-        $users = array_slice($users, 0, DEFAULT_MAX_FOLLOW_PER_DAY);
+        array_multisort($usersSort, SORT_NUMERIC, SORT_DESC, $users);
 
         return [
             'searches' => count($searches),
             'total'    => $usersTotal,
             'count'    => count($users),
-            'items'    => $users,
+            'items'    => array_slice($users, 0, DEFAULT_MAX_FOLLOW_PER_DAY),
         ];
     }
 
@@ -147,10 +145,20 @@ class User extends Model
             $users[$userId] = $user;
         }
 
+        $usersTotal = count($users);
+        $usersSort  = [];
+
+        foreach ($users as $id => $user) {
+
+            $usersSort[$id] = $user['date'];
+        }
+
+        array_multisort($usersSort, SORT_STRING, SORT_ASC, $users);
+
         return [
             'total' => count($unfollowUsers),
-            'count' => count($users),
-            'items' => $users,
+            'count' => $usersTotal,
+            'items' => array_slice($users, 0, DEFAULT_MAX_FOLLOW_PER_DAY),
         ];
     }
 }

@@ -14,5 +14,5 @@ foreach(TwitterApi::$searches as $search) {
     $api->sync('users/search', array(
         'q' => $search,
         'count' => 20,
-    ), '\\Model\\Search', DEFAULT_CACHE_TIME, null);
+    ), '\\Model\\Search', DEFAULT_CACHE_TIME);
 }
