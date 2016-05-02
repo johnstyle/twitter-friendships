@@ -123,8 +123,12 @@ class TwitterApi extends \TwitterOAuth
 
             $response = $this->get($url, $parameters);
 
-            if(!$response
-                || isset($response['errors'])) {
+            if (!$response) {
+
+                return false;
+            }
+
+            if(isset($response['errors'])) {
 
                 print_r($response);
 
