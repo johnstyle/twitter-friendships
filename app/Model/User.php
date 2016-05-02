@@ -94,6 +94,8 @@ class User extends Model
             $users[$userId] = $user;
         }
 
+        $usersTotal = count($users);
+
         $usersByFolowers = [];
 
         foreach ($users as $id => $user) {
@@ -105,9 +107,10 @@ class User extends Model
         $users = array_slice($users, 0, DEFAULT_MAX_FOLLOW_PER_DAY);
 
         return [
-            'total' => count($searches),
-            'count' => count($users),
-            'items' => $users,
+            'searches' => count($searches),
+            'total'    => $usersTotal,
+            'count'    => count($users),
+            'items'    => $users,
         ];
     }
 

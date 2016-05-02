@@ -15,7 +15,7 @@ defined('DEFAULT_MIN_ACTIVITY_DAYS') OR define('DEFAULT_MIN_ACTIVITY_DAYS', 30);
 defined('DEFAULT_UNFOLLOW_DAYS') OR define('DEFAULT_UNFOLLOW_DAYS', 30);
 defined('DEFAULT_REFOLLOW_DAYS') OR define('DEFAULT_REFOLLOW_DAYS', 30 * 6);
 defined('DEFAULT_LANGUAGE') OR define('DEFAULT_LANGUAGE', 'fr');
-defined('DEFAULT_MAX_FOLLOW_PER_DAY') OR define('DEFAULT_MAX_FOLLOW_PER_DAY', 1);
+defined('DEFAULT_MAX_FOLLOW_PER_DAY') OR define('DEFAULT_MAX_FOLLOW_PER_DAY', 50);
 
 defined('DIR_ROOT') OR define('DIR_ROOT', realpath(__DIR__) . '/..');
 defined('DIR_CACHE') OR define('DIR_CACHE', DIR_ROOT . '/cache');

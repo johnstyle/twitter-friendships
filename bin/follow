@@ -42,4 +42,4 @@ foreach ($users['items'] as $userId => $user) {
 
 Followed::save();
 
-Console::total($users['count'], $users['total']);
+Console::total($users['count'], $users['total'] . ' (' . $users['searches'] . ')');

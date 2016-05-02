@@ -25,7 +25,8 @@ class TwitterApi extends \TwitterOAuth
         $responseHash = null;
         $cursor = -1;
 
-        echo "\n" . $url . "\n";
+        echo "\n";
+        echo $url . "\n";
         echo str_repeat('-', 110) . "\n";
 
         do {
@@ -68,6 +69,8 @@ class TwitterApi extends \TwitterOAuth
                     break;
             }
 
+            echo json_encode($parameters) ."\n";
+
             $responseHashNext = (string) md5(json_encode($response));
 
             if($response
@@ -109,8 +112,6 @@ class TwitterApi extends \TwitterOAuth
      */
     public function getCached($url, array $parameters = array(), $file, $cache = DEFAULT_CACHE_TIME, $sleep = 10)
     {
-        echo json_encode($parameters) ."\n";
-
         if(is_null($cache)
             || !file_exists($file)
             || filemtime($file) < (time() - $cache)) {

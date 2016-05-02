@@ -26,5 +26,5 @@ echo "Whitelist         : " . number_format(count($whitelist), 0, '.', ' ') . "\
 echo "Blocked           : " . number_format(count($blocks), 0, '.', ' ') . "\n";
 echo "Unfollowed        : " . number_format(count($unfollowed), 0, '.', ' ') . "\n";
 echo "Followed          : " . number_format(count($followed), 0, '.', ' ') . "\n";
-echo "Users to follow   : " . number_format($usersToFollow['count'], 0, '.', ' ') . " / " . number_format($usersToFollow['total'], 0, '.', ' ') . "\n";
+echo "Users to follow   : " . number_format($usersToFollow['count'], 0, '.', ' ') . " / " . number_format($usersToFollow['total'], 0, '.', ' ') . " (" . $usersToFollow['searches'] . ")\n";
 echo "Users to unfollow : " . number_format($usersToUnfollow['count'], 0, '.', ' ') . " / " . number_format($usersToUnfollow['total'], 0, '.', ' ') . "\n";

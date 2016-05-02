@@ -2,14 +2,17 @@
 <?php
 
 use Core\TwitterApi;
+use Model\Search;
 
 /** @var TwitterApi $api */
 $api = include __DIR__ . '/../bootstrap.php';
+
+Search::load();
 
 foreach(TwitterApi::$searches as $search) {
 
     $api->sync('users/search', array(
         'q' => $search,
         'count' => 20,
-    ), '\\Model\\Search', DEFAULT_CACHE_TIME);
+    ), '\\Model\\Search', DEFAULT_CACHE_TIME, null);
 }
