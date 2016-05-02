@@ -127,7 +127,11 @@ class TwitterApi extends \TwitterOAuth
                 || isset($response['errors'])) {
 
                 print_r($response);
-                unlink($file);
+
+                if (file_exists($file)) {
+
+                    unlink($file);
+                }
                 exit;
             }
 
