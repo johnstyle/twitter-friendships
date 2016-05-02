@@ -40,6 +40,11 @@ class TwitterApi extends \TwitterOAuth
                         $cursor = 1;
                     }
 
+                    if (1000 <= ($cursor * (array_key_exists('count', $parameters) ? $parameters['count'] : 20))) {
+
+                        break 2;
+                    }
+
                     $parameters = array_merge($parameters, array(
                         'page' => $cursor,
                     ));
