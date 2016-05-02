@@ -18,7 +18,7 @@ defined('DEFAULT_LANGUAGE') OR define('DEFAULT_LANGUAGE', 'fr');
 defined('DEFAULT_MAX_FOLLOW_PER_DAY') OR define('DEFAULT_MAX_FOLLOW_PER_DAY', 20);
 
 defined('DIR_ROOT') OR define('DIR_ROOT', realpath(__DIR__) . '/..');
-defined('DIR_CACHE') OR define('DIR_CACHE', DIR_ROOT . '/cache');
 defined('DIR_DATA') OR define('DIR_DATA', DIR_ROOT . '/data');
+defined('DIR_CACHE') OR define('DIR_CACHE', DIR_DATA . '/cache');
 
 defined('DEFAULT_CACHE_TIME') OR define('DEFAULT_CACHE_TIME', 3600*24*7);
