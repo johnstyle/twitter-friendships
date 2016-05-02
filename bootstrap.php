@@ -11,6 +11,11 @@ include realpath(__DIR__) . '/vendor/autoload.php';
 
 TwitterApi::$searches = include realpath(__DIR__) . '/settings/searches.php';
 
+if (!is_dir(DIR_DATA . '/actions/')) {
+
+    mkdir(DIR_DATA . '/actions/', 0755, true);
+}
+
 return new TwitterApi(
     TWITTER_CONSUMER_KEY,
     TWITTER_CONSUMER_SECRET,
