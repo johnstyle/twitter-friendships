@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-php bin/sync
+ABS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+php "${ABS}/bin/sync"
 
 if [ "${1}" = '--unfollow' ]; then
 
-    php bin/unfollow
+    php "${ABS}/bin/unfollow"
 fi
 
-php bin/follow
-php bin/search
+php "${ABS}/bin/follow"
+php "${ABS}/bin/search"
+
