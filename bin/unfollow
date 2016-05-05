@@ -11,11 +11,12 @@ $api = include __DIR__ . '/../bootstrap.php';
 
 Console::header('Unfollow users');
 
-$users = User::getUserToUnfollow();
+$users = User::getUserToUnfollow('nofollowback');
 
 if (null === $users
     || 0 === $users['count']) {
 
+    Console::total(0);
     return;
 }
 

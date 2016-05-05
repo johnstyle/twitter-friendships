@@ -71,7 +71,8 @@ class User extends Model
 
         foreach ($searches as $userId => $user) {
 
-            $user['ratio'] = 0 !== (int) $user['followers_count'] ? (int) $user['friends_count'] / (int) $user['followers_count'] : 0;
+            $user['ratio']   = 0 !== (int) $user['followers_count'] ? (int) $user['friends_count'] / (int) $user['followers_count'] : 0;
+            $user['context'] = $user['search_term'];
 
             if (array_key_exists($userId, $usersList)
                 || (array_key_exists($userId, $unfollowed)
@@ -113,36 +114,103 @@ class User extends Model
     }
 
     /**
-     * @return array
+     * @param     $type
+     * @param int $limit
+     *
+     * @return array|null
      */
-    public static function getUserToUnfollow()
+    public static function getUserToUnfollow($type, $limit = DEFAULT_MAX_FOLLOW_PER_DAY)
     {
         $users         = [];
+        $searches      = [];
         $followers     = Model::getList('followers');
         $friends       = Model::getList('friends');
         $whitelist     = Model::getList('whitelist');
         $followed      = Model::getList('actions/followed');
-        $unfollowUsers = array_diff_key($friends, $followers, $whitelist);
 
         if (!count($followers)
-            || !count($friends)
-            || !count($unfollowUsers)) {
+            || !count($friends)) {
 
             return null;
         }
 
-        $followedDate = (new \DateTime())->modify('-' . DEFAULT_UNFOLLOW_DAYS . ' days')->format('Y-m-d');
+        switch ($type) {
 
-        foreach ($unfollowUsers as $userId => $user) {
+            case 'nofollowback':
 
-            if (!array_key_exists($userId, $friends)
-                || !array_key_exists($userId, $followed)
-                || (new \DateTime($followed[$userId]['date']))->format('Y-m-d') > $followedDate) {
+                $followedDate = (new \DateTime())->modify('-' . DEFAULT_UNFOLLOW_DAYS . ' days')->format('Y-m-d');
 
-                continue;
-            }
+                foreach (array_diff_key($friends, $followers, $whitelist) as $userId => $user) {
 
-            $users[$userId] = $user;
+                    if (!array_key_exists($userId, $friends)
+                        || !array_key_exists($userId, $followed)
+                        || (new \DateTime($followed[$userId]['date']))->format('Y-m-d') > $followedDate) {
+
+                        continue;
+                    }
+
+                    $users[$userId] = $user;
+                }
+                break;
+
+            case 'inactive':
+
+                $activityDate = (new \DateTime())->modify('-6 month')->format('Y-m-d');
+
+                foreach (array_diff_key($friends, $whitelist) as $userId => $user) {
+
+                    if (!array_key_exists($userId, $friends)) {
+
+                        continue;
+                    }
+
+                    $user['ratio']   = 0 !== (int) $user['followers_count'] ? (int) $user['friends_count'] / (int) $user['followers_count'] : 0;
+                    $user['context'] = null;
+
+                    if (0 !== (int) $user['protected']) {
+
+                        $user['context'] = 'protected';
+
+                    } elseif ('' === (string) $user['profile_image_url_https']) {
+
+                        $user['context'] = 'profile_image_url_https';
+
+                    } elseif (DEFAULT_LANGUAGE !== (string) $user['lang']) {
+
+                        $user['context'] = 'lang';
+
+                    } elseif ((new \DateTime($user['last_status']))->format('Y-m-d') < $activityDate) {
+
+                        $user['context'] = 'last_status';
+
+                    } elseif (50 > (int) $user['statuses_count']) {
+
+                        $user['context'] = 'statuses_count';
+
+                    } elseif (50 > (int) $user['friends_count']) {
+
+                        $user['context'] = 'friends_count';
+
+                    } elseif (50 > (int) $user['followers_count']) {
+
+                        $user['context'] = 'followers_count';
+
+                    } elseif (3 < (int) $user['ratio']) {
+
+                        $user['context'] = 'max_ratio';
+                    }
+
+                    if ($user['context']) {
+
+                        $users[$userId] = $user;
+                    }
+                }
+                break;
+        }
+
+        if (!count($users)) {
+
+            return null;
         }
 
         $usersTotal = count($users);
@@ -156,9 +224,9 @@ class User extends Model
         array_multisort($usersSort, SORT_STRING, SORT_ASC, $users);
 
         return [
-            'total' => count($unfollowUsers),
+            'total' => count($searches),
             'count' => $usersTotal,
-            'items' => array_slice($users, 0, DEFAULT_MAX_FOLLOW_PER_DAY),
+            'items' => array_slice($users, 0, $limit),
         ];
     }
 }
