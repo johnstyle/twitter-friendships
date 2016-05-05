@@ -16,6 +16,7 @@ $users = User::getUserToFollow();
 if (null === $users
     || 0 === $users['count']) {
 
+    Console::total(0);
     return;
 }
 
